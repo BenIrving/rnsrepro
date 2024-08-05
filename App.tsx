@@ -6,54 +6,76 @@
  */
 
 import React from 'react';
-import type {PropsWithChildren} from 'react';
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
+  FlatList,
   View,
+  StatusBar,
+  Text,
+  TouchableHighlight,
+  useColorScheme,
 } from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
+import {createNativeStackNavigator} from 'react-native-screens/native-stack';
+import {NavigationContainer, useNavigation} from '@react-navigation/native';
+import {enableScreens} from 'react-native-screens';
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+enableScreens();
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+const RootStack = createNativeStackNavigator();
+
+const StackA = createNativeStackNavigator();
+
+const DummyComponent1 = () => {
+  const nav = useNavigation();
+
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
+    <View>
+      <Text>Screen 1</Text>
+      <FlatList
+        horizontal
+        renderItem={({index}) => {
+          return (
+            <TouchableHighlight onPress={() => nav.navigate('Screen2')}>
+              <Text>Press me</Text>
+            </TouchableHighlight>
+          );
+        }}
+        data={Array(1).fill(1, 1, 1)}
+      />
     </View>
   );
-}
+};
+const DummyComponent2 = () => {
+  const nav = useNavigation();
+  return (
+    <View>
+      <Text>Screen 2</Text>
+      <FlatList
+        horizontal
+        renderItem={({index}) => {
+          return (
+            <TouchableHighlight onPress={() => nav.navigate('Screen1')}>
+              <Text>Now Press me</Text>
+            </TouchableHighlight>
+          );
+        }}
+        data={Array(1).fill(1, 1, 1)}
+      />
+    </View>
+  );
+};
+
+const Stack = () => {
+  return (
+    <StackA.Navigator
+      initialRouteName="Screen1"
+      screenOptions={{headerShown: false, hideKeyboardOnSwipe: true}}>
+      <StackA.Screen name="Screen1" component={DummyComponent1} />
+      <StackA.Screen name="Screen2" component={DummyComponent2} />
+    </StackA.Navigator>
+  );
+};
 
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
@@ -63,56 +85,25 @@ function App(): React.JSX.Element {
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <NavigationContainer>
+      <View
+        style={{
+          flex: 1,
+          borderWidth: 1,
+        }}>
+        <StatusBar
+          barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+          backgroundColor={backgroundStyle.backgroundColor}
+        />
+        <RootStack.Navigator
+          initialRouteName="ScreensA"
+          screenOptions={{headerShown: false, hideKeyboardOnSwipe: true}}>
+          <RootStack.Screen component={Stack} name="stack" />
+          {/* <RootStack.Screen component={ScreensB} name="ScreensB" /> */}
+        </RootStack.Navigator>
+      </View>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
 
 export default App;
